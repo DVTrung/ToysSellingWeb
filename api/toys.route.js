@@ -3,9 +3,17 @@ import ToysController from './toys.controller.js';
 import ReviewsController from './reviews.controller.js';
 
 const router = express.Router();
-router.route('/').get(ToysController.apiGetToys);
+router
+.route('/')
+.get(ToysController.apiGetToys)
+.post(ToysController.apiAddToys)
+.put(ToysController.apiUpdateToy)
+.delete(ToysController.apiDeleteToy);
+
 router.route("/id/:id").get(ToysController.apiGetToyById);
 router.route("/status").get(ToysController.apiGetStatus);
+
+
 
 router
 .route('/review')

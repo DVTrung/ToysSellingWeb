@@ -58,4 +58,72 @@ export default class ToysController {
             res.status(500).json({ error: e });
         }
     }
+
+    static async apiAddToys(req, res, next) {
+        try {
+            const item = req.body.item;
+            const qty = req.body.qty;
+            const color = req.body.color;
+            const status = req.body.status;
+            const picture = req.body.picture;
+            const ReviewResponse = await ToysDAO.addToy(
+                item,
+                qty,
+                color,
+                status,
+                picture
+            );
+            res.json({ status: "success" });
+        } catch (e) {
+
+            res.status(500).json({ error: e.message });
+
+        }
+    }
+
+
+
+    static async apiUpdateToy(req, res, next) {
+        try {
+            const toyId = req.body.item_id;
+            const item = req.body.item;
+            const qty = req.body.qty;
+            const color = req.body.color;
+            const status = req.body.status;
+            const picture = req.body.picture;
+            const updateResponse = await ToysDAO.updateToy(
+                toyId,
+                item,
+                qty,
+                color,
+                status,
+                picture
+            );
+            var { error } = updateResponse;
+            if (error) {
+                res.status.json({ error });
+            }
+            if (updateResponse.modifiedCount === 0) {
+
+                throw new Error("unable to update review.");
+
+            }
+            res.json({ status: "success " });
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    }
+
+    static async apiDeleteToy(req, res, next) {
+        try {
+            const reviewId = req.body.item_id;
+            const ReviewResponse = await ToysDAO.deleteToy(
+                reviewId,
+            );
+            res.json({ status: "success " });
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    }
+
 }

@@ -1,13 +1,13 @@
 import { ObjectId, ObjectID } from "bson";
 
-let toys;
+let Storage;
 export default class ToysDAO {
     static async injectDB(conn) {
-        if (toys) {
+        if (Storage) {
             return;
         }
         try {
-            toys = await
+            Storage = await
                 conn.db(process.env.TOYSELLING_NS).collection('Storage');
         }
         catch (e) {
@@ -36,9 +36,9 @@ export default class ToysDAO {
 
         let cursor;
         try {
-            cursor = await toys.find(query).limit(ToysPerPage).skip(ToysPerPage * page);
+            cursor = await Storage.find(query).limit(ToysPerPage).skip(ToysPerPage * page);
             const toysList = await cursor.toArray();
-            const totalNumToys = await toys.countDocuments(query);
+            const totalNumToys = await Storage.countDocuments(query);
             return { toysList, totalNumToys };
         }
         catch (e) {
@@ -52,7 +52,7 @@ export default class ToysDAO {
     static async getStatus() {
         let status = []
         try {
-            status = await toys.distinct("status");
+            status = await Storage.distinct("status");
             return status;
         }
         catch (e) {
@@ -64,7 +64,7 @@ export default class ToysDAO {
 
     static async getToyById(id) {
         try {
-            return await toys.aggregate([
+            return await Storage.aggregate([
                 {
                     $match: { _id: new ObjectId(id),}
                 },
@@ -82,6 +82,52 @@ export default class ToysDAO {
             throw e;
         }
     }
+
+
+    static async addToy(item, qty, color, status, picture) {
+        try {
+            const toyDoc = {
+                item: item,
+                qty: qty,
+                color: color,
+                status: status,
+                picture: picture
+            }
+            return await Storage.insertOne(toyDoc);
+        }
+        catch (e) {
+            console.error(`unable to add new product: ${e}`);
+            return { error: e };
+        }
+    }
+
+    static async updateToy(toyId, item, qty, color, status, picture) {
+        try {
+            const updateResponse = await Storage.updateOne(
+                {_id: ObjectId(toyId) },
+                { $set: { item: item, qty: qty, color: color, status: status, picture: picture} }
+            );
+            return updateResponse;
+        }
+        catch (e) {
+            console.error(`unable to update product: ${e}`);
+            return { error: e };
+        }
+    }
+
+    static async deleteToy(toyId) {
+        try {
+            const deleteResponse = await Storage.deleteOne({
+                _id: ObjectId(toyId),
+            });
+            return deleteResponse;
+        }
+        catch (e) {
+            console.error(`unable to delete product: ${e}`);
+            return { error: e };
+        }
+    }
+
 }
 
 
